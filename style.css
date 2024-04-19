@@ -14,16 +14,25 @@
 }
 
 .box{
-    background:greenyellow;
+    background:rgb(0, 160, 0);
     width:100px;
     height:100px;
 
     display: flex;
+    align-items: center;
     justify-content: center;
     font-family: cursive;
     font-size: 50px;
 }
 
 .b{
-    background:green;
+    background:rgb(82 248 17);;
+}
+
+.show{
+    background:rgb(179, 177, 69);
+}
+
+.show.b{
+    background:rgb(233, 230, 91);
 }
