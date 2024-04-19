@@ -1,0 +1,29 @@
+#main{
+    border:1px red solid;
+    width:800px;
+    height:800px;
+    display:flex;
+    flex-direction: column;
+}
+
+.row{
+    width:800px;
+    height:100px;
+    display:flex;
+    flex-direction: row;
+}
+
+.box{
+    background:greenyellow;
+    width:100px;
+    height:100px;
+
+    display: flex;
+    justify-content: center;
+    font-family: cursive;
+    font-size: 50px;
+}
+
+.b{
+    background:green;
+}
