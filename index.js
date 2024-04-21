@@ -1,18 +1,15 @@
-var game=[  [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0]
-];
+var game=[];
+var played=[];
+var flags=0;
+var numMines=6;
 
 //0,0 is in the top left
 
 //0=no mines in sight
 //1-8=# of adjacent mines
 //9=mine
+
+var colors=["", "#0377fc", "#4bbf4b", "#b81f1f", "#6822bd", "#bbd41e", "#1fc6cc", "#363d3d", "#22345e"];
 
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
@@ -79,19 +76,62 @@ function generateBoxes(){
 }
 
 function click(e){
-    showBox(e.target);
-    calculateBoxes(e.target);
+    var flag=false;
+    if(e.altKey){ 
+        flag=true; 
+        showBox(e.target, flag);
+    } else {
+        showBox(e.target, false);
+        calculateBoxes(e.target);
+    }
+    checkCond(e.target, flag);
 }
 
-function showBox(el){
+function showBox(el, flag){
     var x=Number(el.id%8);
     var y=Number((el.id-(el.id%8))/8);
-    
-    console.log(el.id, x, y);
-    if(game[y][x]!=0){
-        el.textContent=game[y][x];
+
+    if (flag) {
+        flags[y][x]=flags[y][x]+1;
+        if(flags[y][x]%2==0){
+            el.classList.remove("flag");
+        } else{
+            el.classList.add("flag");
+        }
+    } else { 
+        if(game[y][x]!=0){
+            el.textContent=game[y][x];
+        }
+        el.style.color=colors[game[y][x]];
+        el.classList.add("show");
+        if(game[y][x]==9){
+            gameOver();
+        }
     }
-    el.classList.add("show");
+}
+
+function checkCond(el, flag){
+    var x=Number(el.id%8);
+    var y=Number((el.id-(el.id%8))/8);
+
+    if(game[y][x]==9&&!flag){
+        gameOver();
+    }
+
+    var mines=0;
+    played[y][x]=game[y][x];
+    for(i=0;i<played.length;i++){
+        for(j=0;j<played[i].length;j++){
+            if(played[i][j]==9){
+                mines++;
+            }
+        }
+    }
+    if(mines==numMines){
+        win();
+    }
+    console.log(mines);
+    debugger;
 }
 
 //dumbbbb
@@ -109,7 +149,6 @@ function contains(array, array2, param){
 function calculateBoxes(start){
     var explored=[];
     var temp=[Number((start.id%8)), Number((start.id-(start.id%8))/8)]
-    console.log(temp[0], temp[1]);
     if(game[temp[1]][temp[0]]==0){
         var waiting=[[temp[0], temp[1]]];
         while(waiting.length>0){
@@ -117,17 +156,63 @@ function calculateBoxes(start){
             
             var i=current[0];
             var j=current[1];
-            if((i-1)>=0 && (j+1)<8 && game[j+1][i-1]==0 && !contains(explored, waiting, ([i-1, j+1]))){ waiting.unshift([i-1, j+1]); } 
-            if((j+1)<8 && game[j+1][i]==0 && !contains(explored, waiting, ([i, j+1]))){ waiting.unshift([i, j+1]); } 
-            if((i+1)<8 && (j+1)<8 && game[j+1][i+1]==0 && !contains(explored, waiting, ([i+1, j+1]))){ waiting.unshift([i+1, j+1]); }
-            if((i-1)>=0 && game[j][i-1]==0 && !contains(explored, waiting, ([i-1, j]))){ waiting.unshift([i-1, j]); }
-            if((i+1)<8 && game[j][i+1]==0 && !contains(explored, waiting, ([i+1, j]))){ waiting.unshift([i+1, j]); }
-            if((i-1)>=0 && (j-1)>=0 && game[j-1][i-1]==0 && !contains(explored, waiting, ([i-1, j-1]))){ waiting.unshift([i-1, j-1]); }
-            if((j-1)>=0 && game[j-1][i]==0 && !contains(explored, waiting, ([i, j-1]))){ waiting.unshift([i, j-1]); }
-            if((i+1)<8 && (j-1)>=0 && game[j-1][i+1]==0 && !contains(explored, waiting, ([i+1, j-1]))){ waiting.unshift([i+1, j-1]); }
-
+            if((i-1)>=0 && (j+1)<8 && !contains(explored, waiting, ([i-1, j+1]))){ 
+                if(game[j+1][i-1]==0){
+                    waiting.unshift([i-1, j+1]); 
+                } else{
+                    explored.push([i-1, j+1]);
+                }
+            } 
+            if((j+1)<8 && !contains(explored, waiting, ([i, j+1]))){ 
+                if(game[j+1][i]==0){
+                    waiting.unshift([i, j+1]); 
+                } else{
+                    explored.push([i, j+1]);
+                }
+            } 
+            if((i+1)<8 && (j+1)<8 && !contains(explored, waiting, ([i+1, j+1]))){ 
+                if(game[j+1][i+1]==0){
+                    waiting.unshift([i+1, j+1]); 
+                } else{
+                    explored.push([i+1, j+1]);
+                }
+            }
+            if((i-1)>=0 && !contains(explored, waiting, ([i-1, j]))){ 
+                if(game[j][i-1]==0){
+                    waiting.unshift([i-1, j]); 
+                } else{
+                    explored.push([i-1, j]);
+                }
+            }
+            if((i+1)<8 && !contains(explored, waiting, ([i+1, j]))){ 
+                if(game[j][i+1]==0){
+                    waiting.unshift([i+1, j]); 
+                } else{
+                    explored.push([i+1, j]);
+                }
+            }
+            if((i-1)>=0 && (j-1)>=0 && !contains(explored, waiting, ([i-1, j-1]))){ 
+                if(game[j-1][i-1]==0){
+                    waiting.unshift([i-1, j-1]); 
+                } else{
+                    explored.push([i-1, j-1]);
+                }
+            }
+            if((j-1)>=0 && !contains(explored, waiting, ([i, j-1]))){ 
+                if(game[j-1][i]==0){
+                    waiting.unshift([i, j-1]); 
+                } else{
+                    explored.push([i, j-1]);
+                }
+            }
+            if((i+1)<8 && (j-1)>=0 && !contains(explored, waiting, ([i+1, j-1]))){ 
+                if(game[j-1][i+1]==0){
+                    waiting.unshift([i+1, j-1]); 
+                } else{
+                    explored.push([i+1, j-1]);
+                }
+            }
             explored.push(current);
-            //debugger;
         }
         console.log(explored);
         for(i=0;i<explored.length;i++){
@@ -136,7 +221,52 @@ function calculateBoxes(start){
     }
 }
 
-generateMines(9);
-calcValues();
-generateBoxes();
-console.log(game);
+function gameOver(){
+    alert("Oh no! You hit a mine!");
+    reset();
+}
+
+function win(){
+    alert("You Won!");
+    reset();
+}
+
+function reset(){
+    document.body.replaceChildren([]);
+    main = document.createElement("div");
+    main.id="main";
+    document.body.appendChild(main);
+    game=[  [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0]
+    ];
+    played=[[9,9,9,9,9,9,9,9],
+            [9,9,9,9,9,9,9,9],
+            [9,9,9,9,9,9,9,9],
+            [9,9,9,9,9,9,9,9],
+            [9,9,9,9,9,9,9,9],
+            [9,9,9,9,9,9,9,9],
+            [9,9,9,9,9,9,9,9],
+            [9,9,9,9,9,9,9,9]
+    ];
+    flags=[ [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0]
+    ];
+    generateMines(numMines);
+    calcValues();
+    generateBoxes();
+    console.log(game);
+}
+
+reset();
