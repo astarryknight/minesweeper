@@ -104,9 +104,7 @@ function showBox(el, flag){
         }
         el.style.color=colors[game[y][x]];
         el.classList.add("show");
-        if(game[y][x]==9){
-            gameOver();
-        }
+        played[y][x]=game[y][x];
     }
 }
 
@@ -119,7 +117,6 @@ function checkCond(el, flag){
     }
 
     var mines=0;
-    played[y][x]=game[y][x];
     for(i=0;i<played.length;i++){
         for(j=0;j<played[i].length;j++){
             if(played[i][j]==9){
@@ -130,8 +127,6 @@ function checkCond(el, flag){
     if(mines==numMines){
         win();
     }
-    console.log(mines);
-    debugger;
 }
 
 //dumbbbb
@@ -214,7 +209,6 @@ function calculateBoxes(start){
             }
             explored.push(current);
         }
-        console.log(explored);
         for(i=0;i<explored.length;i++){
             showBox(document.getElementById((explored[i][1]*8)+explored[i][0]));
         }
