@@ -77,7 +77,7 @@ function generateBoxes(){
 
 function click(e){
     var flag=false;
-    if(e.altKey){ 
+    if(e.ctrlKey||e.altKey){ 
         flag=true; 
         showBox(e.target, flag);
     } else {
